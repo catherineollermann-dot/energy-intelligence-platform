@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from sklearn.linear_model import LinearRegression
 
 
 # =========================================================
@@ -44,6 +45,7 @@ if uploaded_file is None:
 
 df = pd.read_csv(uploaded_file)
 
+    
 
 # =========================================================
 # SIDEBAR — FILTERS
@@ -72,6 +74,7 @@ with st.sidebar:
         "Energy Indicator",
         sorted(state1_indicators)
     )
+
 
 
 # =========================================================
@@ -108,12 +111,64 @@ with st.sidebar:
         options=years,
         value=(years[0], years[-1])
     )
+    map_year = st.selectbox(
+    "Map Year",
+    options=years,
+    index=len(years) - 1
+    )
 
 
 chart_df1 = chart_df1[
     (chart_df1["Year"] >= year_range[0]) &
     (chart_df1["Year"] <= year_range[1])
 ].sort_values("Year")
+
+ml_df = chart_df1[["Year", "Data"]].dropna().copy()
+
+X = ml_df[["Year"]]
+y = ml_df["Data"]
+
+model = LinearRegression()
+model.fit(X, y)
+
+
+
+last_year = int(ml_df["Year"].max())
+
+future_years = pd.DataFrame({
+    "Year": range(last_year + 1, last_year + 6)
+})
+
+future_years["Predicted Data"] = model.predict(
+    future_years[["Year"]]
+)
+
+st.subheader("📈 Experimental 5-Year Trend Projection")
+
+forecast_fig = px.line(
+    future_years,
+    x="Year",
+    y="Predicted Data",
+    markers=True,
+    title=f"Experimental Trend Projection for {state1} | {msn}"
+)
+
+forecast_fig.update_layout(
+    xaxis_title="Year",
+    yaxis_title="Predicted Energy Value",
+    template="plotly_dark",
+    height=400,
+    xaxis=dict(
+    tickmode="linear",
+    dtick=1
+    )
+)
+
+st.plotly_chart(
+    forecast_fig,
+    use_container_width=True
+)
+
 
 chart_df2 = chart_df2[
     (chart_df2["Year"] >= year_range[0]) &
@@ -133,19 +188,16 @@ if chart_df1.empty:
 # US MAP
 # =========================================================
 
-map_source = df[
+map_df = df[
     (df["MSN"] == msn) &
-    (df["Year"] >= year_range[0]) &
-    (df["Year"] <= year_range[1])
-]
+    (df["Year"] == map_year) &
+    (df["StateCode"] != "US")
+].copy()
 
-map_df = (
-    map_source
-    .groupby("StateCode", as_index=False)["Data"]
-    .mean()
-)
 
-st.subheader("🗺️ US Energy Consumption Map")
+top_state = map_df.loc[map_df["Data"].idxmax()]
+
+st.subheader(f"🗺️ US Energy Consumption Map — {map_year}")
 
 fig_map = px.choropleth(
     map_df,
@@ -154,7 +206,10 @@ fig_map = px.choropleth(
     color="Data",
     scope="usa",
     color_continuous_scale="Viridis",
-    labels={"Data": "Average Value"},
+    labels={
+        "StateCode": "State",
+        "Data": "Average Value"
+    },
     hover_data={
         "StateCode": True,
         "Data": ":,.2f"
