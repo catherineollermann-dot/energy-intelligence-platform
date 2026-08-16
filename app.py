@@ -30,20 +30,17 @@ with st.sidebar:
     )
 
 
-# =========================================================
-# INITIAL SCREEN
-# =========================================================
-
-if uploaded_file is None:
-    st.info("Upload an energy dataset using the sidebar to begin the analysis.")
-    st.stop()
-
 
 # =========================================================
 # READ DATASET
 # =========================================================
 
-df = pd.read_csv(uploaded_file)
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.sidebar.success("Custom dataset loaded")
+else:
+    df = pd.read_csv("energy_sample.csv")
+    st.sidebar.info("Demo dataset loaded")
 
     
 
