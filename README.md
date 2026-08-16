@@ -2,6 +2,14 @@
 
 An interactive energy analytics platform built with Python and Streamlit to explore historical U.S. energy data, compare state-level trends, visualize geographic patterns, and experiment with predictive modeling.
 
+## 🌐 Live Demo
+
+Try the interactive dashboard directly in your browser:
+
+https://energy-intelligence-platform-project.streamlit.app/
+
+A demonstration dataset is loaded automatically, so the platform can be explored immediately without uploading a file. Users can also upload a compatible CSV dataset for custom analysis.
+
 This project was developed as part of my professional data and technology portfolio while pursuing an M.S. in Science & Technology Management with a Computer Science focus.
 
 ## 📊 Project Overview
@@ -14,7 +22,8 @@ The platform combines data processing, interactive visualization, statistical an
 
 ## 🚀 Features
 
-- CSV dataset upload and processing
+- Built-in demonstration dataset for immediate exploration
+- Optional CSV dataset upload for custom analysis
 - Interactive state selection
 - Energy indicator filtering
 - Historical year-range filtering
